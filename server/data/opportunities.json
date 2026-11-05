@@ -1,0 +1,272 @@
+[
+  {
+    "id": "fossee-winter-internship-2026",
+    "title": "FOSSEE Winter Internship 2026",
+    "type": "internship",
+    "organization": "FOSSEE, IIT Bombay",
+    "description": "Remote winter internship where students contribute to open-source scientific software projects such as eSim, Osdag and DWSIM after clearing a short screening task.",
+    "location": "Remote",
+    "remote": true,
+    "deadline": "2026-11-23",
+    "eligibility": {
+      "years": ["2nd year", "3rd year", "4th year"],
+      "fields": ["Engineering", "Science", "Computer Science"],
+      "notes": "Open to students at Indian institutions; selection is based on a screening task; internship runs from 7 December 2026."
+    },
+    "tags": ["open-source", "research", "software", "remote"],
+    "link": "https://fossee.in/winter-internship/2026",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "india-space-lab-winter-internship-2026",
+    "title": "India Space Lab Winter Internship 2026 (Batch II)",
+    "type": "internship",
+    "organization": "India Space Lab",
+    "description": "Research internship in space science and engineering with mentoring from ISRO-linked scientists, run in two batches for Indian and international students.",
+    "location": "Remote",
+    "remote": true,
+    "deadline": "2026-12-18",
+    "eligibility": {
+      "years": ["2nd year", "3rd year", "4th year", "Postgraduate"],
+      "fields": ["Aerospace Engineering", "Physics", "Electronics", "Computer Science"],
+      "notes": "Batch II registration closes 18 December 2026; open to undergraduate, postgraduate and research scholars in India or abroad."
+    },
+    "tags": ["space", "research", "aerospace", "remote"],
+    "link": "https://www.isl.ac.in/internship/",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "science-academies-summer-research-fellowship-2027",
+    "title": "Science Academies' Summer Research Fellowship Programme 2027",
+    "type": "internship",
+    "organization": "Indian Academy of Sciences, INSA and NASI",
+    "description": "Two-month summer research fellowship that places selected students with a scientist at an Indian research institution, with a monthly stipend and train fare.",
+    "location": "India",
+    "remote": false,
+    "deadline": "2026-11-30",
+    "eligibility": {
+      "years": ["2nd year", "3rd year", "4th year", "Postgraduate"],
+      "fields": ["Science", "Engineering", "Mathematics", "Medicine"],
+      "notes": "Open to undergraduate, postgraduate and integrated-degree students at UGC/AICTE-recognised institutions; only one application per candidate; fellowship runs in summer 2027."
+    },
+    "tags": ["research", "fellowship", "science", "stipend"],
+    "link": "https://webjapps.ias.ac.in/fellowship2027/application_instructions.jsp",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "kotak-kanya-scholarship-2026",
+    "title": "Kotak Kanya Scholarship 2026-27",
+    "type": "scholarship",
+    "organization": "Kotak Education Foundation",
+    "description": "Scholarship of INR 1.5 lakh per year for girl students from low-income families pursuing a professional undergraduate degree, paid for the full course duration.",
+    "location": "India",
+    "remote": false,
+    "deadline": "2026-11-15",
+    "eligibility": {
+      "years": ["1st year"],
+      "fields": ["Engineering", "Medicine", "Law", "Design", "Architecture"],
+      "notes": "Girl students with at least 75% in Class 12, annual family income up to INR 6 lakh, admitted to first year of an eligible professional course in 2026-27."
+    },
+    "tags": ["scholarship", "women", "merit-cum-means", "professional-degree"],
+    "link": "https://www.kotakeducationfoundation.org/kotak-kanya-scholarship",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "aicte-pragati-scholarship-2026",
+    "title": "AICTE Pragati Scholarship for Girl Students (Technical Degree)",
+    "type": "scholarship",
+    "organization": "AICTE, Ministry of Education",
+    "description": "Scholarship of INR 50,000 per year for girl students in AICTE-approved technical degree programmes, covering tuition fees and incidentals.",
+    "location": "India",
+    "remote": false,
+    "deadline": "2026-11-30",
+    "eligibility": {
+      "years": ["1st year", "2nd year", "3rd year", "4th year"],
+      "fields": ["Engineering", "Technology"],
+      "notes": "Girl students only; annual family income up to INR 8 lakh; a maximum of two girls per family may apply; applications through the National Scholarship Portal."
+    },
+    "tags": ["scholarship", "women", "engineering", "government"],
+    "link": "https://scholarships.gov.in/All-Scholarships",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "aicte-swanath-scholarship-2026",
+    "title": "AICTE Swanath Scholarship (Technical Degree)",
+    "type": "scholarship",
+    "organization": "AICTE, Ministry of Education",
+    "description": "Scholarship of INR 50,000 per year for orphans, wards of armed forces or police martyrs, and students who lost parents to COVID-19, studying an AICTE-approved technical degree.",
+    "location": "India",
+    "remote": false,
+    "deadline": "2026-11-30",
+    "eligibility": {
+      "years": ["1st year", "2nd year", "3rd year", "4th year"],
+      "fields": ["Engineering", "Technology"],
+      "notes": "Requires an orphan, martyr or COVID-19 supporting certificate; annual family income up to INR 8 lakh; applications through the National Scholarship Portal."
+    },
+    "tags": ["scholarship", "welfare", "engineering", "government"],
+    "link": "https://scholarships.gov.in/All-Scholarships",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "pm-yasasvi-top-class-college-2026",
+    "title": "PM YASASVI Top Class Education Scheme (College)",
+    "type": "scholarship",
+    "organization": "Ministry of Social Justice and Empowerment",
+    "description": "Tuition support and living allowance for OBC, EBC and DNT students admitted to colleges listed under the scheme's top-class education programme.",
+    "location": "India",
+    "remote": false,
+    "deadline": "2026-11-30",
+    "eligibility": {
+      "years": ["1st year"],
+      "fields": ["All fields"],
+      "notes": "For OBC, EBC and DNT students; family income limit applies; the institution must be on the scheme's approved list; applications through the National Scholarship Portal."
+    },
+    "tags": ["scholarship", "government", "inclusion", "tuition"],
+    "link": "https://scholarships.gov.in/All-Scholarships",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "federal-bank-hormis-scholarship-2026",
+    "title": "Federal Bank Hormis Memorial Foundation Scholarship 2026-27",
+    "type": "scholarship",
+    "organization": "Federal Bank Hormis Memorial Foundation",
+    "description": "Reimbursement of tuition and educational expenses up to INR 1 lakh per year, plus laptop or tablet support, for first-year students in selected professional courses.",
+    "location": "India",
+    "remote": false,
+    "deadline": "2026-12-31",
+    "eligibility": {
+      "years": ["1st year"],
+      "fields": ["Medicine", "Engineering", "Architecture", "Nursing", "Agriculture", "Business"],
+      "notes": "Applicants must be natives of Andhra Pradesh, Gujarat, Karnataka, Kerala, Maharashtra, Tamil Nadu or Telangana; annual family income up to INR 3 lakh; first-year admission in 2026-27."
+    },
+    "tags": ["scholarship", "merit-cum-means", "professional-degree", "reimbursement"],
+    "link": "https://scholarships.federalbank.co.in:6443/fedschlrshipportal/",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "hackwithaditya-2026",
+    "title": "HackWithAditya 2026",
+    "type": "hackathon",
+    "organization": "Aditya University with Oracle Academy",
+    "description": "Two-level student hackathon: submit a working prototype online for free, then shortlisted teams build on-site for 48 hours against enhancement briefs.",
+    "location": "Samalkota, Andhra Pradesh, India",
+    "remote": false,
+    "deadline": "2026-11-25",
+    "eligibility": {
+      "years": ["1st year", "2nd year", "3rd year", "4th year"],
+      "fields": ["All fields"],
+      "notes": "Teams of 4-6 currently enrolled students in India; Level 1 submission is free; shortlisted teams pay INR 800 per member; event runs 18-20 December 2026."
+    },
+    "tags": ["hackathon", "prototype", "ai", "on-site"],
+    "link": "https://hackathon.adityauniversity.in/",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "cosmo-hacks-2026",
+    "title": "Cosmo Hacks 2026",
+    "type": "hackathon",
+    "organization": "Cosmo Hacks",
+    "description": "Month-long online hackathon for students with space-themed tracks and beginner-friendly resources, free to enter.",
+    "location": "Remote",
+    "remote": true,
+    "deadline": "2027-01-18",
+    "eligibility": {
+      "years": ["1st year", "2nd year", "3rd year", "4th year"],
+      "fields": ["All fields"],
+      "notes": "Open to students worldwide; submissions run from 19 December 2026 to 18 January 2027; no entry fee."
+    },
+    "tags": ["hackathon", "space", "online", "students"],
+    "link": "https://cosmohacks.devpost.com/",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "genhacks-2026",
+    "title": "GenHacks",
+    "type": "hackathon",
+    "organization": "GenHacks",
+    "description": "Virtual hackathon open to students aged 13 and above worldwide, where participants work solo or in teams and submit a project built during the event.",
+    "location": "Remote",
+    "remote": true,
+    "deadline": "2026-12-26",
+    "eligibility": {
+      "years": ["High school", "1st year", "2nd year", "3rd year", "4th year"],
+      "fields": ["All fields"],
+      "notes": "Students only, from any country; submissions open 1 November 2026 and close 26 December 2026; free to enter."
+    },
+    "tags": ["hackathon", "online", "beginner-friendly", "students"],
+    "link": "https://genhacks-open.devpost.com/",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "imeche-railway-challenge-2027",
+    "title": "IMechE Railway Challenge 2027",
+    "type": "competition",
+    "organization": "Institution of Mechanical Engineers (IMechE)",
+    "description": "Engineering competition in which university teams design and build a miniature locomotive, then compete in dynamic and static challenges.",
+    "location": "United Kingdom",
+    "remote": false,
+    "deadline": "2026-11-27",
+    "eligibility": {
+      "years": ["2nd year", "3rd year", "4th year", "Postgraduate"],
+      "fields": ["Mechanical Engineering", "Electrical Engineering", "Railway Engineering"],
+      "notes": "Teams may include university students, apprentices and early-career engineers; team registration closes 27 November 2026."
+    },
+    "tags": ["competition", "engineering", "railway", "team"],
+    "link": "https://www.imeche.org/news/news-article/railway-challenge-2027-team-registration-now-open",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "sony-world-photography-student-2026",
+    "title": "Sony World Photography Awards: Student Competition",
+    "type": "competition",
+    "organization": "World Photography Organisation",
+    "description": "Global photography competition for students, with cash prizes, Sony equipment and exhibition exposure for winning series.",
+    "location": "Remote",
+    "remote": true,
+    "deadline": "2026-11-27",
+    "eligibility": {
+      "years": ["1st year", "2nd year", "3rd year", "4th year", "Postgraduate"],
+      "fields": ["Photography", "Fine Arts", "Media"],
+      "notes": "Open to students aged 18-30 enrolled in a photography-focused course; free to enter."
+    },
+    "tags": ["competition", "photography", "arts", "global"],
+    "link": "https://www.worldphoto.org/sony-world-photography-awards/student",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "farm-robotics-challenge-2027",
+    "title": "Farm Robotics Challenge 2027",
+    "type": "competition",
+    "organization": "University of California Agriculture and Natural Resources",
+    "description": "Competition challenging college teams to build autonomous solutions for real farm tasks using the Amiga robot, with cash prizes for the strongest teams.",
+    "location": "Remote",
+    "remote": true,
+    "deadline": "2026-12-13",
+    "eligibility": {
+      "years": ["2nd year", "3rd year", "4th year", "Postgraduate"],
+      "fields": ["Robotics", "Agricultural Engineering", "Computer Science"],
+      "notes": "Open to college students globally; team proposal due 13 December 2026; USD 100 entry fee per team."
+    },
+    "tags": ["competition", "robotics", "agriculture", "autonomy"],
+    "link": "https://www.farmroboticschallenge.ai/participate",
+    "verified_on": "2026-11-04"
+  },
+  {
+    "id": "rewild-the-future-challenge-2026",
+    "title": "Rewild the Future Challenge",
+    "type": "competition",
+    "organization": "Wageningen University and Research",
+    "description": "Student challenge to design biodiversity-restoration plans for rural landscapes, with workshops, expert feedback and a final pitch event.",
+    "location": "Wageningen, Netherlands",
+    "remote": false,
+    "deadline": "2026-11-16",
+    "eligibility": {
+      "years": ["3rd year", "4th year", "Postgraduate"],
+      "fields": ["Environmental Science", "Ecology", "Landscape Architecture", "Agriculture"],
+      "notes": "Open to Bachelor, Master and PhD students worldwide; registration closes 16 November 2026."
+    },
+    "tags": ["competition", "biodiversity", "sustainability", "team"],
+    "link": "https://www.wur.nl/en/education/studying-wageningen/rewild-future-challenge-bring-biodiversity-back-rural-lands",
+    "verified_on": "2026-11-04"
+  }
+]
