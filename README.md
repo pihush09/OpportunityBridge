@@ -8,21 +8,24 @@
 ## Table of Contents
 
 - [Overview & Problem Statement](#overview--problem-statement)
-- [System Architecture & Shortlist Flow](#system-architecture--shortlist-flow)
+- [Tech Stack](#tech-stack)
+- [System Architecture & Data Lifecycle](#system-architecture--data-lifecycle)
 - [Operating Modes](#operating-modes)
-  - [Mode 1: Basic Mode (Standalone — Zero Dependencies)](#mode-1-basic-mode-standalone--zero-dependencies)
+  - [Mode 1: Basic Mode (Standalone — No External Service Dependencies)](#mode-1-basic-mode-standalone--no-external-service-dependencies)
   - [Mode 2: Full Switch Mode (Multi-Agent Swarm)](#mode-2-full-switch-mode-multi-agent-swarm)
+- [Why Switch is Central & Agent Roles](#why-switch-is-central--agent-roles)
 - [Full Switch Mode Setup Guide](#full-switch-mode-setup-guide)
   - [1. Prerequisites](#1-prerequisites)
   - [2. Startup Order & Process Flow](#2-startup-order--process-flow)
   - [3. Environment Configuration](#3-environment-configuration)
   - [4. Agent Configuration & Workspace Paths](#4-agent-configuration--workspace-paths)
   - [5. Mattermost Channel Setup & Teammate Interaction](#5-mattermost-channel-setup--teammate-interaction)
-- [Database Persistence & Data Integrity](#database-persistence--data-integrity)
+- [JSON Persistence Layer & Data Integrity](#json-persistence-layer--data-integrity)
 - [Project Structure](#project-structure)
 - [Quick Start: Local Installation & Run](#quick-start-local-installation--run)
 - [Local URLs & API Reference](#local-urls--api-reference)
 - [Automated Testing & Coverage](#automated-testing--coverage)
+- [Screenshots & Demo Video](#screenshots--demo-video)
 - [Security & Credential Guidelines](#security--credential-guidelines)
 - [Hackathon Requirement Alignment](#hackathon-requirement-alignment)
 
@@ -30,101 +33,127 @@
 
 ## Overview & Problem Statement
 
-College students frequently struggle to discover relevant, verified academic opportunities—such as internships, scholarships, hackathons, fellowships, and competitions—due to fragmented portals, expired deadlines, and complex eligibility criteria.
+College students frequently struggle to discover relevant, high-quality academic opportunities—such as internships, scholarships, hackathons, fellowships, and research programs—due to fragmented portals, expired deadlines, and opaque eligibility criteria.
 
-**OpportunityBridge** solves this problem by providing a student-first web application that combines:
+**OpportunityBridge** solves this problem by providing a student-centric platform combining:
 
-1. **Curated Opportunity Discovery:** Explore vetted opportunities across internships, scholarships, hackathons, and competitions.
-2. **Transparent Eligibility & Skill Matching:** A rule-based engine that evaluates academic discipline, year of study, skills, and interests without opaque black-box AI decisions.
-3. **Deadline Tracking:** Visual timeline grouping opportunities into *Urgent* (≤ 7 days), *Upcoming* (8–30 days), and *Rolling* deadlines.
-4. **Application Guidance & Checklist Persistence:** Interactive, step-by-step preparation checklists (Resume, SOP, Portfolio, Transcripts) persisted per opportunity.
-5. **Switch Multi-Agent Coordination (Optional):** An agentic scouting pipeline connecting `bridge-coordinator` and `opportunity-scout` over Mattermost to discover, verify, and synchronize fresh opportunities from the web.
+1. **Curated Opportunity Discovery:** Explore vetted academic and career opportunities categorized by internships, scholarships, hackathons, and competitions.
+2. **Transparent Eligibility & Skill Matching:** A deterministic, rule-based matching engine that evaluates student discipline, year of study, skills, and interests without opaque black-box AI scoring.
+3. **Deadline Categorization:** A structured timeline organizing deadlines into *Urgent* (≤ 7 days), *Upcoming* (8–30 days), and *Rolling* categories.
+4. **Application Guidance & Checklist Persistence:** Interactive preparation checklists (Resume, SOP, Portfolio, Transcripts) persisted per opportunity.
+5. **Switch Multi-Agent Scouting Pipeline:** An autonomous agent swarm operating over Mattermost that discovers, validates, and synchronizes fresh opportunities on demand.
 
 ---
 
-## System Architecture & Shortlist Flow
+## Tech Stack
 
-The following diagram illustrates the complete data lifecycle—from student discovery request to agent web scouting, shortlist generation on disk, and database synchronization:
+| Layer | Technologies | Purpose |
+| :--- | :--- | :--- |
+| **Frontend UI** | React 18, Vite, Tailwind CSS, Lucide React | Responsive single-page application with dashboard, filters, and modals. |
+| **Backend API** | Node.js (v18+), Express.js (v4), CORS, Dotenv | RESTful API server handling matching, persistence, and agent coordination. |
+| **Persistence Layer** | Lightweight JSON-file-backed persistent store | Schema-structured local store (`opportunitybridge_db.json`) and seed (`opportunities.json`). |
+| **Multi-Agent Swarm** | Switch Platform (Daemon on `:64854`), OpenCode | Autonomous agent orchestration and runtime environment. |
+| **Team Collaboration** | Mattermost (port `:8065`), Channel: `OpportunityBridge` | Real-time agent collaboration, webhook relays, and human-in-the-loop interaction. |
+| **Live Web Discovery** | Exa Search API via `opportunity-scout` | Real-time web search, link extraction, and academic criteria validation. |
+| **Automated Testing** | Node.js Native Test Runner (`node --test`), `node:assert` | 27 automated unit tests covering scoring, normalization, and deduplication. |
+
+---
+
+## System Architecture & Data Lifecycle
+
+The following diagram illustrates the complete workflow: from student search request to agent web research, shortlist generation on disk, backend validation, database persistence, and UI display:
 
 ```mermaid
 flowchart TD
     subgraph Client ["Frontend (React 18 + Vite :5173)"]
-        UI["UI Pages (Dashboard, Discovery, Matches, Deadlines, Saved, Profile)"]
-        Modal["Switch Multi-Agent Hub & Sync Modal"]
+        UI["Web UI\n(Dashboard, Matches, Deadlines, Saved, Profile)"]
+        Modal["Switch Multi-Agent Hub\n(Telemetry & Dispatch)"]
     end
 
     subgraph Server ["Backend (Node.js + Express :5000)"]
-        Router["Express REST API"]
-        Matcher["Rule-Based Matcher & Eligibility Engine"]
-        Dedupe["Request Normalizer & Deduplicator"]
-        SyncEngine["Shortlist Validator & Sync Service"]
+        Router["Express API Router"]
+        Matcher["Rule-Based Matcher Engine"]
+        Dedupe["Query Normalizer & Deduplicator"]
+        SyncEngine["Shortlist Validator & Ingestion Engine"]
     end
 
-    subgraph LocalStorage ["Local Persistence"]
-        DB[("opportunitybridge_db.json\n(Relational Store)")]
+    subgraph Storage ["Local Storage"]
+        DB[("opportunitybridge_db.json\n(JSON Persistence Layer)")]
         Seed[("opportunities.json\n(15 Baseline Seed)")]
     end
 
     subgraph SwitchLayer ["Switch Multi-Agent Network (Optional)"]
         SwitchDaemon["Switch Daemon (:64854)"]
-        Room["Mattermost Channel:\nOpportunityBridge"]
-        AdminAgent["switch-buddy-admin\n(Integration Gateway)"]
-        CoordinatorAgent["bridge-coordinator\n(Task Orchestrator)"]
-        ScoutAgent["opportunity-scout\n(Live Web Researcher)"]
-        ScoutWorkspace[/"Scout Workspace on Disk\n(e.g., piyush-cybersecurity-shortlist.json)"/]
+        MM["Mattermost Channel:\nOpportunityBridge (:8065)"]
+        Coordinator["bridge-coordinator\n(Task Orchestrator)"]
+        Scout["opportunity-scout\n(Web Researcher)"]
+        ScoutWorkspace[/"Scout Workspace on Disk\n(e.g., student-query-shortlist.json)"/]
     end
 
     %% Web Application Flow
-    UI <-->|HTTP Requests| Router
-    Modal -->|Dispatch Query| Router
+    UI <-->|1. HTTP Requests| Router
     Router --> Matcher
-    Router --> DB
-    DB -.->|Seed Fallback| Seed
+    Router <--> DB
+    DB -.->|Initial Seed Fallback| Seed
 
-    %% Switch Multi-Agent Flow
+    %% Switch Scouting Flow
+    Modal -->|2. POST /api/switch/request| Router
     Router --> Dedupe
-    Dedupe -->|1. Room Message Webhook| SwitchDaemon
-    SwitchDaemon --> Room
-    Room <--> AdminAgent
-    Room <--> CoordinatorAgent
-    CoordinatorAgent -->|2. Delegate Deliverable Task| Room
-    Room --> ScoutAgent
-    ScoutAgent -->|3. Live Exa Web Search & Link Verification| ScoutAgent
-    ScoutAgent -->|4. Write Isolated Shortlist JSON| ScoutWorkspace
-    ScoutAgent -->|5. Post Confirmation & Exclusions| Room
-    Room --> CoordinatorAgent
+    Dedupe -->|3. POST /agents/:senderId/message| SwitchDaemon
+    SwitchDaemon -->|4. Forward Event| MM
+    MM -->|5. Notify Task| Coordinator
+    Coordinator -->|6. Delegate Search Query| Scout
+    Scout -->|7. Live Web Search via Exa| Scout
+    Scout -->|8. Write Shortlist JSON| ScoutWorkspace
+    Scout -->|9. Post Summary & Links to Channel| MM
+    MM -.->|10. Poll Room Messages| Modal
 
-    %% Shortlist Sync Flow
-    Modal -->|6. Trigger Shortlist Sync| Router
+    %% Ingestion Flow
+    Modal -->|11. POST /api/switch/sync| Router
     Router --> SyncEngine
-    SyncEngine -->|7. Read & Validate Shortlist JSON| ScoutWorkspace
-    SyncEngine -->|8. Insert New Records (Deduplicated)| DB
-    DB --> UI
+    SyncEngine -->|12. Read & Validate Schema/URLs/Deadlines| ScoutWorkspace
+    SyncEngine -->|13. Ingest Validated Records| DB
+    DB -->|14. Updated Opportunities & Matches| UI
 ```
 
 ---
 
 ## Operating Modes
 
-OpportunityBridge is engineered to be **modular and resilient**, supporting two distinct operating modes:
+OpportunityBridge is engineered to be **modular and resilient**, supporting two operating modes:
 
-### Mode 1: Basic Mode (Standalone — Zero Dependencies)
+### Mode 1: Basic Mode (Standalone — No External Service Dependencies)
 
-> **Important:** Basic Mode requires **no Docker, no Switch Console, and no Mattermost**. Everything runs locally on standard Node.js.
+> **Quick Evaluation for Judges:** Basic Mode requires **no Docker, no Switch Daemon, and no Mattermost**. The application runs immediately with standard npm packages.
 
-In Basic Mode:
-- The entire web application operates out-of-the-box using the local file-backed database (`opportunitybridge_db.json`) and the 15 baseline curated opportunities (`opportunities.json`).
-- Students can browse, filter, search, view match scores with explainability, update their academic profile, track deadlines, save opportunities, and persist application checklist progress.
-- All core APIs function without external services or network calls.
+- Operates using the local JSON-file-backed persistence layer (`opportunitybridge_db.json`) and the 15 baseline curated opportunities (`opportunities.json`).
+- Full access to student profile management, opportunity filtering, rule-based match scoring with breakdowns, deadline tracking, and interactive application checklists.
+- The UI status indicator will show `Offline` for Switch, but all web application features operate smoothly with zero runtime errors.
 
 ### Mode 2: Full Switch Mode (Multi-Agent Swarm)
 
-In Full Switch Mode:
-- The backend connects to the local Switch server (`SWITCH_SERVER_URL=http://127.0.0.1:64854`) and the `OpportunityBridge` Mattermost room.
-- Users can dispatch fresh discovery queries from the UI (e.g., *"Cybersecurity internships for second-year CSE students"*).
-- The query passes through backend normalization and deduplication to avoid redundant agent runs.
-- Autonomous OpenCode agents collaborate in Mattermost to research, verify official links/deadlines, exclude ineligible programs, and write isolated shortlist JSON files.
-- Newly scouted shortlist files are inspected and imported into the local database with duplicate prevention.
+- Connects the backend to the local Switch server (`SWITCH_SERVER_URL=http://127.0.0.1:64854`) and Mattermost room (`OpportunityBridge`).
+- Students dispatch fresh queries from the UI (e.g., *"Cybersecurity internships for second-year CSE students"*).
+- The query passes through backend normalization and deduplication to avoid redundant agent dispatches.
+- Autonomous OpenCode agents collaborate in Mattermost to research programs, verify official links/deadlines, exclude ineligible entries, and write structured shortlist JSON files.
+- Scouted shortlist files are validated and imported into the local database with duplicate prevention.
+
+---
+
+## Why Switch is Central & Agent Roles
+
+### Why Switch is Essential to OpportunityBridge
+Static opportunity directories degrade rapidly: deadlines expire, application links change, and new programs launch continuously. Traditional hardcoded web scrapers break when web layouts shift and lack domain context.
+
+Switch transforms OpportunityBridge into an **autonomous, event-driven opportunity discovery network**. Instead of relying on manual data entry, students can dispatch natural-language discovery requests. Autonomous AI agents collaborate inside a dedicated Mattermost channel, conduct live web research, filter results against academic eligibility, and deliver machine-readable shortlists directly to the application.
+
+### Specialized Agent Swarm Roles
+
+| Agent Name | Agent ID | Core Role & Responsibilities |
+| :--- | :--- | :--- |
+| **`bridge-coordinator`** | `85bba940-1799-4c1c-8a41-ac7b8e4138ca` | **Task Orchestrator:** Monitors the Mattermost room for student queries, checks historical requests for duplicates, defines task parameters, delegates search scopes to `opportunity-scout`, and reports progress back to teammates. |
+| **`opportunity-scout`** | `814eb770-74f0-4c57-80f7-92ef3ce4bc9e` | **Autonomous Web Researcher:** Queries the live web using the Exa search API, filters results against target academic criteria (branch, year, GPA), extracts application deadlines, validates official URLs, and outputs structured shortlist JSON deliverables to disk. |
+| **`switch-buddy-admin`** | `3cdb41ce-bdc4-4332-94c7-31ba4da44ba9` | **Gateway & Webhook Relay:** Bridges communication between the Express API server and the Mattermost room, handling message delivery and room history retrieval. |
 
 ---
 
@@ -134,28 +163,27 @@ Follow this guide to run OpportunityBridge with the complete multi-agent Switch 
 
 ### 1. Prerequisites
 
-- **Docker Desktop:** Running (required by Switch Console to host the Mattermost container).
+- **Docker Desktop:** Running and healthy (used by Switch Console to host the Mattermost container).
 - **Switch Console Desktop App:** Installed (provides local agent management and daemon).
-- **OpenCode CLI:** Installed (`npm install -g opencode-ai`).
+- **Node.js:** v18.11.0 or higher.
 
 ### 2. Startup Order & Process Flow
 
-To bring up the entire multi-agent environment in the correct order:
+To bring up the multi-agent environment reliably:
 
-```text
-Step 1: Start Docker Desktop
-   ↓
-Step 2: Launch Switch Console Application
-   ↓ (Switch automatically boots Mattermost container & local daemon on port 64854)
-Step 3: Verify the 3 Agents are bound & online in Switch Console:
-        - bridge-coordinator
-        - opportunity-scout
-        - switch-buddy-admin
-   ↓
-Step 4: Configure server/.env with your local Switch token & workspace path
-   ↓
-Step 5: Start OpportunityBridge (npm run dev)
+```mermaid
+flowchart LR
+    Step1["1. Start Docker Desktop"] --> Step2["2. Launch Switch Console\n(Daemon on :64854)"]
+    Step2 --> Step3["3. Verify Mattermost\n(Port :8065)"]
+    Step3 --> Step4["4. Start Agents in Console\n(coordinator & scout)"]
+    Step4 --> Step5["5. Start OpportunityBridge\n(npm run dev)"]
 ```
+
+1. **Start Docker Desktop:** Ensure the Docker daemon is active.
+2. **Launch Switch Console:** Start the Switch desktop application. It automatically exposes the Switch daemon on port `64854`.
+3. **Verify Mattermost:** Confirm Mattermost is accessible at `http://localhost:8065` with the `OpportunityBridge` channel created.
+4. **Start Agents:** Verify `bridge-coordinator`, `opportunity-scout`, and `switch-buddy-admin` are active and bound to the room.
+5. **Configure & Start OpportunityBridge:** Copy the environment template and run `npm run dev`.
 
 ### 3. Environment Configuration
 
@@ -165,7 +193,7 @@ Copy the template file to create your local `.env`:
 cp server/.env.example server/.env
 ```
 
-Configure the environment variables in `server/.env`:
+Configure `server/.env` with your local settings:
 
 ```env
 PORT=5000
@@ -179,59 +207,53 @@ SWITCH_ROOM_ID=b721b78a-33b7-4629-9c08-1ddc1def71c6
 SWITCH_SENDER_AGENT_ID=3cdb41ce-bdc4-4332-94c7-31ba4da44ba9
 SWITCH_COORDINATOR_ID=85bba940-1799-4c1c-8a41-ac7b8e4138ca
 SWITCH_SCOUT_ID=814eb770-74f0-4c57-80f7-92ef3ce4bc9e
-SWITCH_API_TOKEN=your_switch_agent_token_here
-SWITCH_SCOUT_DIR=/path/to/.switch/agents/<host-id>/opportunity-scout
+SWITCH_API_TOKEN=your_secure_switch_agent_token_here
+
+# Path to opportunity-scout workspace directory (where shortlist JSON files are saved)
+# Examples:
+#   Windows:      C:\Users\<username>\.switch\agents\<instance-id>\opportunity-scout
+#   Linux/macOS:  ~/.switch/agents/<instance-id>/opportunity-scout
+SWITCH_SCOUT_DIR=/path/to/switch/agents/opportunity-scout
 ```
 
-> **Security Note:** `server/.env` contains your private local Switch authentication token and is strictly excluded by `.gitignore`. Never commit `server/.env` to Git.
+> **Security Note:** `server/.env` is strictly excluded by `.gitignore`. Real credentials and tokens must never be committed to Git.
 
 ### 4. Agent Configuration & Workspace Paths
 
-The three agents running in Switch:
+When `opportunity-scout` generates new opportunities, it writes structured JSON shortlist files to its local workspace directory.
 
-| Agent Name | Agent ID | Role | Workspace |
-| :--- | :--- | :--- | :--- |
-| **`bridge-coordinator`** | `85bba940-1799-4c1c-8a41-ac7b8e4138ca` | **Task Orchestrator**: Maintains `PLAN.md`, validates query boundaries, delegates tasks, and verifies deliverables. | `~/.switch/agents/<host-id>/bridge-coordinator` |
-| **`opportunity-scout`** | `814eb770-74f0-4c57-80f7-92ef3ce4bc9e` | **Research Specialist**: Uses live web search (Exa) to find opportunities, validates eligibility/deadlines, and writes shortlist files. | `~/.switch/agents/<host-id>/opportunity-scout` |
-| **`switch-buddy-admin`** | `3cdb41ce-bdc4-4332-94c7-31ba4da44ba9` | **Gateway**: Used by OpportunityBridge's Express backend to post messages and fetch room history. | `~/.switch/agents/<host-id>/switch-buddy-admin` |
-
-#### How to Configure `SWITCH_SCOUT_DIR`:
-- **Linux / macOS:** `~/.switch/agents/<host-id>/opportunity-scout`
-- **Windows:** `%USERPROFILE%\.switch\agents\<host-id>\opportunity-scout`
-- Replace `<host-id>` with the directory name generated by your Switch instance (e.g., `localhost-60993`).
-- *Fallback:* If `SWITCH_SCOUT_DIR` is not configured, the backend automatically checks `server/data/` for shortlist files.
+To point OpportunityBridge to your local scout directory:
+- **macOS / Linux:** Set `SWITCH_SCOUT_DIR` to `~/.switch/agents/<instance-id>/opportunity-scout`
+- **Windows:** Set `SWITCH_SCOUT_DIR` to `%USERPROFILE%\.switch\agents\<instance-id>\opportunity-scout`
+- *Fallback Mechanism:* If `SWITCH_SCOUT_DIR` is not set or the file is not found there, the backend automatically falls back to checking `server/data/` for shortlist files.
 
 ### 5. Mattermost Channel Setup & Teammate Interaction
 
-- **Channel Name:** `OpportunityBridge` (Room ID: `b721b78a-33b7-4629-9c08-1ddc1def71c6`).
-- **Accessing the Channel:**
-  - Launch Switch Console and select the `OpportunityBridge` room from the channels panel.
-  - Alternatively, open the local Mattermost web interface spun up by Switch Console in your browser.
-- **How Teammates Can Interact with Agents:**
-  - **Direct Coordination:** Type `@bridge-coordinator <message>` to ask about the current plan status or request a new discovery topic.
-  - **Verification Inquiries:** Type `@opportunity-scout <message>` to ask why a specific opportunity was included or excluded.
-  - **Observing Live Decisions:** Teammates can watch agents evaluate schemes in real time, including reasons for exclusion (e.g., graduation year requirements, expired deadlines, or stale portal dates).
-- **Access Requirements:** Access to the local machine running Switch Console with Docker Desktop active.
+- **Channel Name:** `OpportunityBridge` (Default Room ID: `b721b78a-33b7-4629-9c08-1ddc1def71c6`).
+- **Human-in-the-Loop Interaction:** Teammates and mentors can interact directly with the agent swarm in Mattermost:
+  - **Trigger Research:** Post `@bridge-coordinator find robotics competitions for mechanical engineering students`.
+  - **Check Status:** Post `@bridge-coordinator status` to inspect current agent deliverables.
+  - **Review Findings:** Inspect real-time reasoning and shortlist summaries posted by `opportunity-scout`.
 
 ---
 
-## Database Persistence & Data Integrity
+## JSON Persistence Layer & Data Integrity
 
-OpportunityBridge uses a schema-indexed, file-backed relational database located at `server/data/opportunitybridge_db.json`, implemented via `LocalDatabase` in [`server/src/config/database.js`](file:///server/src/config/database.js).
+OpportunityBridge uses a lightweight, schema-structured JSON-file-backed persistence engine located at `server/data/opportunitybridge_db.json`, implemented via `LocalDatabase` in [`server/src/config/database.js`](server/src/config/database.js).
 
-### Data Tables
+### Data Collections
 
-- **`profiles`:** Stores the student's profile (name, degree, branch, year of study, skills, interests, location). Persists across server restarts.
-- **`opportunities`:** Stores all active opportunity records. Seeded initially with 15 verified entries from [`server/data/opportunities.json`](file:///server/data/opportunities.json) and expanded when scout shortlists are synchronized.
-- **`saved_applications`:** Stores bookmarked opportunities, notes, application status, and per-item checklist progress (`resume`, `sop`, `portfolio`, `transcripts`).
-- **`switch_sync_logs`:** Audit trail of all agent dispatches and shortlist synchronizations.
+- **`profiles`:** Stores student academic data (name, degree, branch, year of study, skills, interests, location). Persists across server restarts.
+- **`opportunities`:** Stores all active opportunity records. Seeded initially with the 15 baseline entries from [`server/data/opportunities.json`](server/data/opportunities.json) and expanded when scout shortlists are synchronized.
+- **`saved_applications`:** Stores bookmarked opportunities, notes, and preparation checklist progress (`resume`, `sop`, `portfolio`, `transcripts`).
+- **`switch_sync_logs`:** Audit trail of all agent dispatch and shortlist synchronization events.
 - **`dispatched_requests`:** Historical index of dispatched queries used for intelligent deduplication.
 
-### Data Integrity Rules
+### Data Integrity Guardrails
 
-- **Baseline Seed Invariance:** The 15 baseline curated opportunities in `opportunities.json` are **immutable** and never modified or deleted.
-- **Duplicate Prevention on Import:** When syncing a scout shortlist, opportunities are deduplicated by `id` and `title + organization`. Existing records and bookmarks are preserved.
-- **URL & Deadline Validation:** Imports strictly require valid `http://` or `https://` URLs (rejecting placeholder or malformed links) and confirmed dates or explicit `rolling` status.
+- **Baseline Seed Preservation:** The 15 baseline curated opportunities in `opportunities.json` are read-only and immutable; automated agent workflows never delete or overwrite them.
+- **Duplicate Prevention on Import:** When synchronizing shortlist files, opportunities are deduplicated by `id` and `title + organization`. Existing records and bookmarks are preserved.
+- **Schema & Link Validation:** Imported opportunities must provide valid `http://` or `https://` URLs, non-empty titles, valid organization names, and confirmed deadlines or explicit `rolling` status. Incomplete records are rejected.
 
 ---
 
@@ -239,10 +261,10 @@ OpportunityBridge uses a schema-indexed, file-backed relational database located
 
 ```text
 OpportunityBridge/
-├── package.json              # Root package with multi-package scripts & concurrently
-├── package-lock.json         # Root dependency lockfile
+├── package.json              # Monorepo root scripts (dev, install:all, etc.)
+├── package-lock.json         # Dependency lockfile
 ├── README.md                 # Project documentation & setup instructions
-├── .gitignore                # Git exclusions (.env, .data, local DB, build outputs)
+├── .gitignore                # Git exclusion rules (.env, .data, local DB, build outputs)
 ├── client/                   # Frontend React 18 application
 │   ├── index.html            # Vite HTML entry point
 │   ├── package.json          # Client dependencies (React 18, Vite, Tailwind CSS, Lucide)
@@ -252,42 +274,42 @@ OpportunityBridge/
 │   ├── vite.config.js        # Vite configuration (port 5173, /api proxy to :5000)
 │   └── src/                  # Client source code
 │       ├── main.jsx          # React DOM root render
-│       ├── App.jsx           # Main layout, tab router & application shell
+│       ├── App.jsx           # Main layout, tab navigation & state shell
 │       ├── index.css         # Global Tailwind styles
-│       ├── components/       # UI Components
-│       │   ├── Navbar.jsx              # Navigation header with system status indicators
-│       │   ├── FilterBar.jsx           # Search and category filtering controls
-│       │   ├── OpportunityCard.jsx     # Opportunity card with match score and tags
-│       │   ├── OpportunityModal.jsx    # Detail view with interactive checklist & guidance
+│       ├── components/       # Reusable UI components
+│       │   ├── Navbar.jsx              # Header with system status indicators
+│       │   ├── FilterBar.jsx           # Search & category filters
+│       │   ├── OpportunityCard.jsx     # Opportunity card with match score & tags
+│       │   ├── OpportunityModal.jsx    # Detail view with interactive preparation checklist
 │       │   ├── StatCard.jsx            # Metric summary cards for Dashboard
 │       │   └── SwitchStatusModal.jsx   # Switch multi-agent telemetry & sync modal
-│       ├── pages/            # Core Views
+│       ├── pages/            # Primary application views
 │       │   ├── DashboardPage.jsx       # Overview metrics, top matches & urgent deadlines
 │       │   ├── DiscoveryPage.jsx       # Search & browse all opportunities
-│       │   ├── MatchesPage.jsx         # Ranked opportunities with match explanations
+│       │   ├── MatchesPage.jsx         # Ranked opportunities with match score breakdowns
 │       │   ├── DeadlinesPage.jsx       # Timeline view (urgent, upcoming, rolling)
-│       │   ├── SavedApplicationsPage.jsx # Bookmarked items with application progress
+│       │   ├── SavedApplicationsPage.jsx # Bookmarked items with application checklist
 │       │   └── ProfilePage.jsx         # Academic year, degree, branch, skills & interests
 │       └── services/
-│           └── api.js        # Frontend HTTP client for backend endpoints
+│           └── api.js        # Centralized HTTP client for backend endpoints
 └── server/                   # Backend Express.js REST API
-    ├── package.json          # Backend dependencies (Express, CORS, Dotenv)
-    ├── package-lock.json     # Backend lockfile
-    ├── .env.example          # Sample environment template (tracked in Git)
-    │                         # Note: server/.env is local only and ignored by Git
+    ├── package.json          # Server dependencies (Express, CORS, Dotenv)
+    ├── package-lock.json     # Server lockfile
+    ├── .env.example          # Environment template (tracked in Git)
+    ├── .env                  # Local environment file (created locally, ignored by Git)
     ├── data/                 # Seed data and persistent storage
-    │   ├── opportunities.json          # Approved immutable 15-entry baseline dataset
+    │   ├── opportunities.json          # 15 baseline seed opportunities (immutable)
     │   ├── profile.json                # Default student profile template
-    │   └── README.md                   # Data directory documentation
-    │   └── opportunitybridge_db.json   # Local file-backed database (created on run, ignored by Git)
+    │   ├── README.md                   # Data folder notes
+    │   └── opportunitybridge_db.json   # Persistent JSON database (created at runtime, ignored by Git)
     ├── src/                  # Server source code
     │   ├── index.js          # Express app entry point & route definitions
     │   ├── config/
-    │   │   └── database.js   # LocalDatabase relational persistence engine
+    │   │   └── database.js   # LocalDatabase JSON persistence engine
     │   ├── services/
     │   │   ├── dataLoader.js    # Seed dataset loader and profile initializer
     │   │   ├── matcher.js       # Rule-based eligibility & weighted skill-matching engine
-    │   │   └── switchService.js # Switch agent webhook, query deduplication & shortlist sync
+    │   │   └── switchService.js # Switch agent dispatch, query deduplication & shortlist sync
     │   └── utils/
     │       └── deadlines.js  # Deadline calculator & categorization utility
     └── tests/                # Automated test suites
@@ -298,6 +320,8 @@ OpportunityBridge/
 ---
 
 ## Quick Start: Local Installation & Run
+
+Get OpportunityBridge running locally in **Basic Mode** in two minutes:
 
 ### 1. Prerequisites
 
@@ -319,15 +343,15 @@ cd OpportunityBridge
 npm run install:all
 ```
 
-*This installs dependencies across the root, `server/`, and `client/`.*
+*(This runs `npm install` across the root, `server/`, and `client/` directories).*
 
-### 3. Run the Application (Basic Mode)
+### 3. Start the Application
 
 ```bash
 npm run dev
 ```
 
-*This concurrently launches:*
+*This concurrently starts:*
 - **Backend API Server:** Listening on `http://localhost:5000`
 - **Frontend Vite Client:** Listening on `http://localhost:5173`
 
@@ -337,29 +361,33 @@ Open [http://localhost:5173/](http://localhost:5173/) in your browser.
 
 ## Local URLs & API Reference
 
-| Service / Endpoint | Method | URL | Description | Verified Status |
+| Service / Endpoint | Method | Local URL | Description | Verified Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Frontend Web App** | `GET` | [http://localhost:5173/](http://localhost:5173/) | OpportunityBridge UI | Tested & Active |
-| **API Health Check** | `GET` | [http://localhost:5000/api/health](http://localhost:5000/api/health) | Returns `{"status": "ok"}` | Tested (200 OK) |
-| **System Status** | `GET` | [http://localhost:5000/api/status](http://localhost:5000/api/status) | Database counts & profile state | Tested (200 OK) |
-| **Opportunities API** | `GET` | [http://localhost:5000/api/opportunities](http://localhost:5000/api/opportunities) | Filter by category, location, query | Tested (200 OK) |
-| **Skill Matches API** | `GET` | [http://localhost:5000/api/matches](http://localhost:5000/api/matches) | Ranked opportunities with scores | Tested (200 OK) |
-| **Deadlines API** | `GET` | [http://localhost:5000/api/deadlines](http://localhost:5000/api/deadlines) | Urgent, upcoming, rolling buckets | Tested (200 OK) |
-| **Saved Applications** | `GET/POST/PUT` | [http://localhost:5000/api/saved](http://localhost:5000/api/saved) | Bookmarks & checklist progress | Tested (200 OK) |
-| **Student Profile API** | `GET/PUT` | [http://localhost:5000/api/profile](http://localhost:5000/api/profile) | Get & update profile info | Tested (200 OK) |
-| **Dashboard Stats API** | `GET` | [http://localhost:5000/api/stats](http://localhost:5000/api/stats) | Summary metrics for dashboard | Tested (200 OK) |
-| **Switch Dispatch API** | `POST` | [http://localhost:5000/api/switch/request](http://localhost:5000/api/switch/request) | Send request with deduplication | Tested (200 OK) |
-| **Switch Sync API** | `POST` | [http://localhost:5000/api/switch/sync](http://localhost:5000/api/switch/sync) | Sync scout shortlist to database | Tested (200 OK) |
-| **Switch History API** | `GET` | [http://localhost:5000/api/switch/history](http://localhost:5000/api/switch/history) | Fetch Mattermost room messages | Tested (200 OK) |
-| **Available Shortlists** | `GET` | [http://localhost:5000/api/switch/available-shortlists](http://localhost:5000/api/switch/available-shortlists) | List scout shortlist files | Tested (200 OK) |
+| **Frontend Web App** | `GET` | [http://localhost:5173/](http://localhost:5173/) | OpportunityBridge User Interface | Active (Vite build verified) |
+| **API Health Check** | `GET` | [http://localhost:5000/api/health](http://localhost:5000/api/health) | Returns server health status | Active (HTTP 200) |
+| **System Status** | `GET` | [http://localhost:5000/api/status](http://localhost:5000/api/status) | Database record counts & agent readiness | Active (HTTP 200) |
+| **Dashboard Stats** | `GET` | [http://localhost:5000/api/stats](http://localhost:5000/api/stats) | Aggregated metrics for dashboard | Active (HTTP 200) |
+| **Opportunities API** | `GET` | [http://localhost:5000/api/opportunities](http://localhost:5000/api/opportunities) | Filter by category, location, query | Active (HTTP 200) |
+| **Opportunity Detail** | `GET` | [http://localhost:5000/api/opportunities/:id](http://localhost:5000/api/opportunities/:id) | Single opportunity with deadline & match info | Active (HTTP 200) |
+| **Skill Matches API** | `GET` | [http://localhost:5000/api/matches](http://localhost:5000/api/matches) | Opportunities ranked by match score | Active (HTTP 200) |
+| **Deadlines API** | `GET` | [http://localhost:5000/api/deadlines](http://localhost:5000/api/deadlines) | Categorized deadlines (urgent, upcoming, rolling) | Active (HTTP 200) |
+| **Saved Applications** | `GET` | [http://localhost:5000/api/saved](http://localhost:5000/api/saved) | Bookmarks & checklist progress | Active (HTTP 200) |
+| **Save / Bookmark** | `POST` | [http://localhost:5000/api/saved/:id](http://localhost:5000/api/saved/:id) | Save opportunity and update checklist status | Active (HTTP 200) |
+| **Remove Bookmark** | `DELETE` | [http://localhost:5000/api/saved/:id](http://localhost:5000/api/saved/:id) | Remove opportunity from saved bookmarks | Active (HTTP 200) |
+| **Student Profile API** | `GET/PUT` | [http://localhost:5000/api/profile](http://localhost:5000/api/profile) | Get or update student profile | Active (HTTP 200) |
+| **Switch Request API** | `POST` | [http://localhost:5000/api/switch/request](http://localhost:5000/api/switch/request) | Dispatch search query with deduplication | Active (HTTP 200) |
+| **Switch Sync API** | `POST` | [http://localhost:5000/api/switch/sync](http://localhost:5000/api/switch/sync) | Ingest scout shortlist JSON into database | Active (HTTP 200) |
+| **Available Shortlists** | `GET` | [http://localhost:5000/api/switch/available-shortlists](http://localhost:5000/api/switch/available-shortlists) | List scout shortlist files in workspace | Active (HTTP 200) |
+| **Switch Sync Logs** | `GET` | [http://localhost:5000/api/switch/logs](http://localhost:5000/api/switch/logs) | Audit trail of sync and dispatch events | Active (HTTP 200) |
+| **Switch Room History** | `GET` | [http://localhost:5000/api/switch/history](http://localhost:5000/api/switch/history) | Fetch Mattermost room conversation events | Active (HTTP 200) |
 
 ---
 
 ## Automated Testing & Coverage
 
-The backend test suite runs natively with Node's built-in test runner (`node --test`) without third-party test dependencies.
+The backend test suite runs natively with Node.js's built-in test runner (`node --test`), requiring zero external testing frameworks.
 
-To execute all tests:
+To execute the test suite:
 
 ```bash
 npm test --prefix server
@@ -381,7 +409,7 @@ Test 3: Genuinely new search query triggers fresh run
 Test 4: Cloud computing & DevOps is recognized as genuinely new
 ✓ Test 4 passed
 --- All Deduplication Unit Tests Passed! ---
-✔ tests/deduplication.test.js (526ms)
+✔ tests/deduplication.test.js (320ms)
 ▶ Skill Normalization & Prevention of False Collisions (3 tests)
 ▶ 16 Required Student Skills Tag Coverage (16 tests)
 ▶ Score Responsiveness to Relevant Skills vs Unrelated Skills (5 tests)
@@ -392,13 +420,32 @@ Test 4: Cloud computing & DevOps is recognized as genuinely new
 ℹ fail 0
 ```
 
-- **Exact Test Counts:** 27 tests executed, 27 passed, 0 failed across 2 test files (`tests/matcher.test.js` and `tests/deduplication.test.js`).
-- **Core Tested Capabilities:**
-  - 16 technical skill mappings (JavaScript, React, Git, HTML, CSS, Python, C++, Java, web development, frontend, backend, AI, machine learning, CAD, robotics, embedded systems).
-  - Substring collision prevention (e.g., distinguishing `AI` or `CAD` without matching unrelated words).
-  - Score responsiveness: relevant skills increase match score, while unrelated skills yield 0 delta.
-  - Academic eligibility guardrails (ineligible years/branches receive zero match).
-  - Intelligent deduplication: whitespace and hyphen variations (`"second-year"` vs `"second year"`) are detected and deduplicated safely.
+- **Verified Results:** Exactly **27 passed unit tests across 4 test suites (0 failures)**.
+- **Covered Scenarios:**
+  - Technical skill normalization across 16 core categories (JavaScript, React, Git, HTML, CSS, Python, C++, Java, web development, frontend, backend, AI, machine learning, CAD, robotics, embedded systems).
+  - Substring collision guardrails (e.g., distinguishing `AI` or `CAD` without matching unrelated words).
+  - Score responsiveness: relevant skills increase match score, while unrelated skills yield zero delta.
+  - Academic eligibility boundaries: ineligible years or branches receive zero match.
+  - Safe query deduplication: whitespace, hyphen, and case variations are detected to prevent redundant agent runs.
+
+---
+
+## Screenshots & Demo Video
+
+### Demo Video
+- 📺 **Walkthrough Demo Video:** `<!-- [Insert Demo Video Link Here - e.g., Loom / YouTube URL] -->`
+
+### Application Previews
+- **Dashboard & Metric Overview:**  
+  `<!-- [Insert Dashboard Screenshot Here - e.g., docs/screenshots/dashboard.png] -->`
+- **Opportunity Discovery & Category Filters:**  
+  `<!-- [Insert Discovery Page Screenshot Here - e.g., docs/screenshots/discovery.png] -->`
+- **Transparent Match Scoring & Breakdown:**  
+  `<!-- [Insert Match Score Explanation Screenshot Here - e.g., docs/screenshots/matches.png] -->`
+- **Deadline Timeline & Urgency Categories:**  
+  `<!-- [Insert Deadlines Timeline Screenshot Here - e.g., docs/screenshots/deadlines.png] -->`
+- **Switch Multi-Agent Telemetry Hub:**  
+  `<!-- [Insert Switch Telemetry Modal Screenshot Here - e.g., docs/screenshots/switch-hub.png] -->`
 
 ---
 
@@ -407,10 +454,10 @@ Test 4: Cloud computing & DevOps is recognized as genuinely new
 To ensure repository security and compliance with hackathon submission guidelines:
 
 1. **No Committed Secrets:** Real API keys, Switch tokens, and private credentials must remain strictly in local `.env` files and must **never** be committed to Git.
-2. **Ignored Directories:** The root [`.gitignore`](file:///c:/Users/Dell/Downloads/OpportunityBridge/.gitignore) explicitly excludes:
-   - `server/.env` and any `.env.*` files (only [`.env.example`](file:///c:/Users/Dell/Downloads/OpportunityBridge/server/.env.example) with placeholder text is tracked).
+2. **Ignored Directories:** The root [`.gitignore`](.gitignore) explicitly excludes:
+   - `server/.env` and any `.env.*` files (only [`server/.env.example`](server/.env.example) with placeholder text is tracked).
    - `.data/` (OpenCode agent databases and runtime logs).
-   - `server/data/opportunitybridge_db.json` (local user database).
+   - `server/data/opportunitybridge_db.json` (local persistent JSON store).
    - `.switch/` (local Switch daemon state and agent workspaces).
    - Build outputs (`client/dist/`, `build/`) and temporary log files.
 3. **Template Configuration:** Always share configuration templates using `server/.env.example` with non-sensitive placeholder values.
@@ -421,10 +468,10 @@ To ensure repository security and compliance with hackathon submission guideline
 
 | Hackathon Requirement | OpportunityBridge Implementation | Documentation Reference |
 | :--- | :--- | :--- |
-| **1. Agents Connected** | Connected to 3 autonomous Switch agents: `bridge-coordinator` (task manager), `opportunity-scout` (researcher), and `switch-buddy-admin` (gateway). | [Switch Multi-Agent Workflow](#switch-multi-agent-workflow) |
-| **2. Channel Setup** | Mattermost room `OpportunityBridge` (`b721b78a-33b7-4629-9c08-1ddc1def71c6`) with multi-agent discussion and human interaction. | [Mattermost Channel Setup](#5-mattermost-channel-setup--teammate-interaction) |
-| **3. How to Run** | Unambiguous instructions provided for both **Basic Mode** (zero external dependencies) and **Full Switch Mode** (Docker + Switch + Mattermost). | [Quick Start](#quick-start-local-installation--run) & [Full Switch Mode Setup Guide](#full-switch-mode-setup-guide) |
-| **4. Reproducible Codebase** | Tested clean builds with Vite; 27/27 automated unit tests passing; zero native build errors. | [Automated Testing & Coverage](#automated-testing--coverage) |
+| **1. Agents Connected** | Connected to 3 autonomous Switch agents: `bridge-coordinator` (task orchestrator), `opportunity-scout` (live web researcher), and `switch-buddy-admin` (gateway). | [Why Switch is Central & Agent Roles](#why-switch-is-central--agent-roles) |
+| **2. Channel Setup** | Mattermost room `OpportunityBridge` (`b721b78a-33b7-4629-9c08-1ddc1def71c6`) with multi-agent orchestration and human teammate collaboration. | [Mattermost Channel Setup](#5-mattermost-channel-setup--teammate-interaction) |
+| **3. How to Run** | Clear, unambiguous instructions provided for both **Basic Mode** (standalone, no external services) and **Full Switch Mode** (Docker + Switch + Mattermost). | [Quick Start](#quick-start-local-installation--run) & [Full Switch Mode Setup Guide](#full-switch-mode-setup-guide) |
+| **4. Reproducible Codebase** | Production build verified cleanly with Vite; 27/27 automated unit tests passing with zero failures. | [Automated Testing & Coverage](#automated-testing--coverage) |
 
 ---
 
