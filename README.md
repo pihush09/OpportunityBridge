@@ -436,16 +436,23 @@ Test 4: Cloud computing & DevOps is recognized as genuinely new
 - 📺 **Walkthrough Demo Video:** `<!-- [Insert Demo Video Link Here - e.g., Loom / YouTube URL] -->`
 
 ### Application Previews
-- **Dashboard & Metric Overview:**  
-  `<!-- [Insert Dashboard Screenshot Here - e.g., docs/screenshots/dashboard.png] -->`
-- **Opportunity Discovery & Category Filters:**  
-  `<!-- [Insert Discovery Page Screenshot Here - e.g., docs/screenshots/discovery.png] -->`
-- **Transparent Match Scoring & Breakdown:**  
-  `<!-- [Insert Match Score Explanation Screenshot Here - e.g., docs/screenshots/matches.png] -->`
-- **Deadline Timeline & Urgency Categories:**  
-  `<!-- [Insert Deadlines Timeline Screenshot Here - e.g., docs/screenshots/deadlines.png] -->`
-- **Switch Multi-Agent Telemetry Hub:**  
-  `<!-- [Insert Switch Telemetry Modal Screenshot Here - e.g., docs/screenshots/switch-hub.png] -->`
+- **Dashboard & Metric Overview:**
+   
+    <img width="1920" height="1028" alt="Dashboard" src="https://github.com/user-attachments/assets/6c0e7d26-9e3d-4840-8527-4a725211221f" />
+
+- **Opportunity Discovery & Category Filters:**
+  
+    <img width="1902" height="1030" alt="opportunity matching engine" src="https://github.com/user-attachments/assets/08ec0aaa-f532-48c1-9a4c-89b5b10cd210" />
+
+- **Switch Multi-Agent Telemetry Hub:**
+  
+    <img width="1902" height="1025" alt="chatroom" src="https://github.com/user-attachments/assets/dbfa4b5c-5bc1-4aef-9d4d-fb2d35de60ca" />
+    
+    <img width="1902" height="1032" alt="mattermost" src="https://github.com/user-attachments/assets/5d498de5-2cbc-43ed-89b6-ff44f1d4b819" />
+
+  - **Switch Console Mattermost Chatroom:**
+   
+    <img width="1920" height="1080" alt="Mattermost chat room" src="https://github.com/user-attachments/assets/aec23063-1837-4abd-9f09-390e904706c6" />
 
 ---
 
