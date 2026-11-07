@@ -430,10 +430,7 @@ Test 4: Cloud computing & DevOps is recognized as genuinely new
 
 ---
 
-## Screenshots & Demo Video
-
-### Demo Video
-- 📺 **Walkthrough Demo Video:** `<!-- [Insert Demo Video Link Here - e.g., Loom / YouTube URL] -->`
+## Screenshots 
 
 ### Application Previews
 - **Dashboard & Metric Overview:**
